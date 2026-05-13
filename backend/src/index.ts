@@ -74,7 +74,7 @@ app.get('/api/auth/google/callback', async (req: Request, res: Response) => {
         email: userInfo.email,
         name: userInfo.name,
         accessToken: tokens.access_token ? encrypt(tokens.access_token) : undefined,
-        refreshToken: tokens.refresh_token ? encrypt(tokens.refreshToken!) : undefined,
+        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token!) : undefined,
         tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
       },
       create: {
