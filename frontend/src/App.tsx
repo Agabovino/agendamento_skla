@@ -3,12 +3,11 @@ import Sidebar from './components/Sidebar';
 import Calendar from './components/Calendar';
 import TimeSlots from './components/TimeSlots';
 import RegistrationForm from './components/RegistrationForm';
-import Login from './pages/Login';
+import AdminSetup from './pages/AdminSetup';
 import { useScheduling } from './hooks/useScheduling';
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<{ id: number; email: string; name: string } | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [isAdminRoute, setIsAdminRoute] = useState(window.location.pathname.startsWith('/admin'));
 
   const {
     selectedDate,
@@ -23,15 +22,13 @@ const App: React.FC = () => {
 
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // 1. Verificar se o usuário está logado ao carregar
+  // Escuta mudanças na URL para roteamento simples
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) setUser(data.user);
-        setAuthLoading(false);
-      })
-      .catch(() => setAuthLoading(false));
+    const handleLocationChange = () => {
+      setIsAdminRoute(window.location.pathname.startsWith('/admin'));
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
   const handleBookingConfirm = () => {
@@ -39,18 +36,14 @@ const App: React.FC = () => {
   };
 
   const handleFormSubmit = async (formData: any) => {
-    if (!user) return;
-
     try {
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          hostId: user.id, // Agora usa o ID do usuário logado!
           clientEmail: formData.email,
-          startTime: schedulingPreview?.start.toISOString(),
-          // Outros campos do form...
           clientName: formData.name,
+          startTime: schedulingPreview?.start.toISOString(),
           location: formData.location,
           service: formData.service
         }),
@@ -59,48 +52,35 @@ const App: React.FC = () => {
       if (response.ok) {
         setIsSuccess(true);
       } else {
-        alert('Erro ao realizar agendamento.');
+        const err = await response.json();
+        alert(`Erro: ${err.error || 'Falha ao agendar'}`);
       }
     } catch (err) {
       alert('Erro de conexão com o servidor.');
     }
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.reload();
-  };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9]">
-        <div className="animate-spin material-symbols-outlined text-4xl text-primary">sync</div>
-      </div>
-    );
-  }
-
-  // 2. Se não houver usuário, mostra APENAS a tela de login
-  if (!user) {
-    return <Login />;
+  if (isAdminRoute) {
+    return <AdminSetup />;
   }
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 font-negroni">
         <div className="max-w-2xl w-full bg-white border-2 border-brand-black rounded-2xl p-12 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto border-2 border-brand-black">
             <span className="material-symbols-outlined text-4xl text-brand-black font-fill">check_circle</span>
           </div>
           <h1 className="text-3xl font-bold">Agendamento Confirmado!</h1>
           <p className="text-gray-600">
-            Enviamos um convite para o seu e-mail e o evento foi sincronizado com sua Google Agenda.
+            O anfitrião recebeu seu pedido e o evento foi sincronizado com a agenda dele.
           </p>
           <div className="pt-8">
             <button 
               onClick={() => window.location.reload()}
               className="px-8 py-3 bg-primary text-white border-2 border-brand-black rounded-full font-bold hover:-translate-y-1 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-0"
             >
-              Novo Agendamento
+              Fazer outro Agendamento
             </button>
           </div>
         </div>
@@ -110,18 +90,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 font-negroni">
-      <div className="w-full max-w-[1100px] flex justify-end mb-4">
-        <div className="flex items-center gap-4 bg-white p-2 px-4 border-2 border-brand-black rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <span className="text-xs font-bold uppercase tracking-widest">{user.name || user.email}</span>
-          <button 
-            onClick={handleLogout}
-            className="material-symbols-outlined text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-          >
-            logout
-          </button>
-        </div>
-      </div>
-
       <main className="w-full max-w-[1100px] min-h-[600px] bg-white border-2 border-brand-black rounded-2xl flex flex-col md:flex-row overflow-hidden relative shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
         
         <Sidebar 

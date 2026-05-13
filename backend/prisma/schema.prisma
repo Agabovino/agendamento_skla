@@ -11,9 +11,10 @@ model User {
   email              String        @unique
   name               String?
   googleId           String        @unique
-  accessToken        String?       // Criptografado
-  refreshToken       String?       // Criptografado
+  accessToken        String?
+  refreshToken       String?
   tokenExpiry        DateTime?
+  isAdmin            Boolean       @default(false)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   appointments       Appointment[]
@@ -24,8 +25,18 @@ model Appointment {
   hostId      Int
   host        User     @relation(fields: [hostId], references: [id])
   clientEmail String
+  clientName  String?
+  location    String?
+  service     String?
   startTime   DateTime
   endTime     DateTime
 
   @@index([hostId])
+}
+
+model SystemSettings {
+  id                 Int      @id @default(1)
+  adminId            Int?     @unique
+  isCalendarConnected Boolean  @default(false)
+  updatedAt          DateTime @updatedAt
 }
