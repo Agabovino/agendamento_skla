@@ -19,22 +19,18 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@agendamento_skla-db-1:5432/${DB_NAME:-scheduling_db}
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-scheduling_db}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=https://vivercatolico.com.br/api/auth/google/callback
     depends_on:
       - db
 
-  frontend:
+  app:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     restart: always
-    networks:
-      default:
-        aliases:
-          - app
     ports:
       - "3000:3000"
     depends_on:
