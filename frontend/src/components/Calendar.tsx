@@ -42,7 +42,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateChange }) => {
   }
 
   return (
-    <section className="flex-1 p-8 flex flex-col">
+    <section className="flex-1 p-8 flex flex-col justify-center">
       <header className="mb-8">
         <h2 className="text-xl font-bold text-brand-black">Escolha uma data e horário</h2>
       </header>
