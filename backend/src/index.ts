@@ -39,9 +39,15 @@ const decrypt = (ciphertext: string) => {
 // --- AUTH ROUTES ---
 
 app.get('/api/auth/google', (req, res) => {
+  // DEBUG LOGS
+  console.log('--- OAUTH DEBUG START ---');
+  console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? `Found (${process.env.GOOGLE_CLIENT_ID.substring(0, 10)}...)` : 'MISSING');
+  console.log('GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI || 'MISSING');
+  console.log('--- OAUTH DEBUG END ---');
+
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    prompt: 'consent', // Força a entrega do refresh_token
+    prompt: 'consent',
     scope: [
       'openid',
       'email',

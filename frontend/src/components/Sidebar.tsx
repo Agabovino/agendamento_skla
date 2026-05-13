@@ -22,11 +22,11 @@ const Sidebar: React.FC<{
           </button>
         )}
         
-        <div className="w-20 h-20 rounded-xl bg-primary flex items-center justify-center p-2 border-2 border-brand-black overflow-hidden">
+        <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center border-2 border-brand-black overflow-hidden">
            <img 
             alt="Logo" 
-            className="w-full h-full object-contain filter invert" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAs4HYuXbVAuJXZ6CegZJI60HoEcmCAQh3-ABSReHFkvF3tTuTIDeEp8WIRj4gPpQQ0j_FjPlkoXz3vfRdarRi5tQjgqXQd1tRKRJCysZQS54BDJ_nVhNRur_c8qrvOF6jtGzNPttxZXzYpAOZx334X8s9vi36SVzbkLSZ7hp7iKJmqo2_4LAz_xAmlpeiDi62IMQlorsQO6OQu9OT01NAkX0GMovtm8Ft7RgSKCDuBC_7GMYVmKwcG6FlPDJUQsxy1ntB4LgoFEJ7R"
+            className="w-full h-full object-cover" 
+            src="/skla_logo.png"
           />
         </div>
         
