@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Calendar from './components/Calendar';
 import TimeSlots from './components/TimeSlots';
 import RegistrationForm from './components/RegistrationForm';
+import Login from './pages/Login';
 import { useScheduling } from './hooks/useScheduling';
 
 const App: React.FC = () => {
+  const [user, setUser] = useState<{ id: number; email: string; name: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const {
     selectedDate,
     setSelectedDate,
@@ -19,19 +23,66 @@ const App: React.FC = () => {
 
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // 1. Verificar se o usuário está logado ao carregar
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) setUser(data.user);
+        setAuthLoading(false);
+      })
+      .catch(() => setAuthLoading(false));
+  }, []);
+
   const handleBookingConfirm = () => {
     setIsRegistering(true);
   };
 
   const handleFormSubmit = async (formData: any) => {
-    console.log('Final booking data:', {
-      ...formData,
-      ...schedulingPreview,
-    });
-    
-    // Simulate API call and success
-    setIsSuccess(true);
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hostId: user.id, // Agora usa o ID do usuário logado!
+          clientEmail: formData.email,
+          startTime: schedulingPreview?.start.toISOString(),
+          // Outros campos do form...
+          clientName: formData.name,
+          location: formData.location,
+          service: formData.service
+        }),
+      });
+
+      if (response.ok) {
+        setIsSuccess(true);
+      } else {
+        alert('Erro ao realizar agendamento.');
+      }
+    } catch (err) {
+      alert('Erro de conexão com o servidor.');
+    }
   };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.reload();
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9]">
+        <div className="animate-spin material-symbols-outlined text-4xl text-primary">sync</div>
+      </div>
+    );
+  }
+
+  // 2. Se não houver usuário, mostra APENAS a tela de login
+  if (!user) {
+    return <Login />;
+  }
 
   if (isSuccess) {
     return (
@@ -59,9 +110,20 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 font-negroni">
+      <div className="w-full max-w-[1100px] flex justify-end mb-4">
+        <div className="flex items-center gap-4 bg-white p-2 px-4 border-2 border-brand-black rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <span className="text-xs font-bold uppercase tracking-widest">{user.name || user.email}</span>
+          <button 
+            onClick={handleLogout}
+            className="material-symbols-outlined text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+          >
+            logout
+          </button>
+        </div>
+      </div>
+
       <main className="w-full max-w-[1100px] min-h-[600px] bg-white border-2 border-brand-black rounded-2xl flex flex-col md:flex-row overflow-hidden relative shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
         
-        {/* Sidebar always visible */}
         <Sidebar 
           duration="1 h"
           description="Reserve seu horário para gravação ou consultoria técnica. Por favor, escolha a data que melhor se adapta à sua agenda."
@@ -74,10 +136,7 @@ const App: React.FC = () => {
           <>
             <Calendar 
               selectedDate={selectedDate}
-              onDateChange={(date) => {
-                setSelectedDate(date);
-                // Clear selected slots when date changes for simplicity
-              }}
+              onDateChange={(date) => setSelectedDate(date)}
             />
             <TimeSlots 
               slots={availableSlots}
