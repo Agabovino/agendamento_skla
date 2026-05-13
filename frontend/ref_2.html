@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agendamento de Horário - Produtora Skla</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#ffdf9b",
+                        "on-secondary-container": "#6d5200",
+                        "surface-dim": "#dadada",
+                        "on-secondary-fixed": "#251a00",
+                        "secondary": "#785a00",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-primary-fixed-variant": "#4e26b2",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#f8be00",
+                        "tertiary": "#343434",
+                        "error": "#ba1a1a",
+                        "primary-container": "#532cb7",
+                        "surface-variant": "#e2e2e2",
+                        "inverse-on-surface": "#f0f1f1",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f3f3f4",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "on-tertiary-container": "#bbbbbb",
+                        "background": "#f9f9f9",
+                        "on-surface-variant": "#494554",
+                        "primary-fixed": "#e8deff",
+                        "on-secondary-fixed-variant": "#5a4300",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-fixed": "#20005f",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-primary-container": "#c3b0ff",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#ffc305",
+                        "tertiary-container": "#4b4b4b",
+                        "surface-tint": "#6743cb",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-background": "#1a1c1c",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "surface-container": "#eeeeee",
+                        "primary-fixed-dim": "#cdbdff",
+                        "primary": "#3c00a0",
+                        "outline": "#7a7585",
+                        "outline-variant": "#cac3d6",
+                        "inverse-primary": "#cdbdff",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "margin-desktop": "40px",
+                        "container-max": "1280px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "label-sm": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-lg": ["Sora"],
+                        "body-md": ["Sora"],
+                        "headline-md": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["13px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .negroni-border {
+            border: 2px solid #000000;
+        }
+        .hard-shadow-hover:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px 0px #000000;
+        }
+        .active-tab {
+            border-left: 4px solid #532cb7;
+            padding-left: 1rem;
+            color: #3c00a0;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Header / Navigation Placeholder based on JSON TopAppBar but suppressed for focused journey -->
+<!-- Applying "Task-Focused" rule to suppress full navigation -->
+<main class="flex-grow flex flex-col md:flex-row max-w-[1280px] mx-auto w-full md:my-margin-desktop bg-surface negroni-border rounded-xl overflow-hidden">
+<!-- Left Sidebar: Identity & Details -->
+<aside class="w-full md:w-80 flex flex-col justify-between py-margin-desktop px-gutter border-b-2 md:border-b-0 md:border-r-2 border-on-surface bg-surface-container-low">
+<div class="flex flex-col gap-6">
+<!-- Back Button -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-on-surface hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<!-- Brand -->
+<div class="flex flex-col gap-2">
+<div class="w-16 h-16 rounded-xl bg-primary-container flex items-center justify-center p-2 negroni-border">
+<img alt="Produtora Skla Logo" class="w-full h-full object-contain filter invert" data-alt="A bold, minimalist graphic logo for a media production company featuring high-contrast geometric shapes. The design is modern and professional, utilizing a deep purple and vibrant yellow color palette. The aesthetic is clean, reflecting a high-end tech-forward visual identity against a dark backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAs4HYuXbVAuJXZ6CegZJI60HoEcmCAQh3-ABSReHFkvF3tTuTIDeEp8WIRj4gPpQQ0j_FjPlkoXz3vfRdarRi5tQjgqXQd1tRKRJCysZQS54BDJ_nVhNRur_c8qrvOF6jtGzNPttxZXzYpAOZx334X8s9vi36SVzbkLSZ7hp7iKJmqo2_4LAz_xAmlpeiDi62IMQlorsQO6OQu9OT01NAkX0GMovtm8Ft7RgSKCDuBC_7GMYVmKwcG6FlPDJUQsxy1ntB4LgoFEJ7R"/>
+</div>
+<p class="font-body-md text-on-surface-variant font-bold">Produtora Skla</p>
+<h1 class="font-headline-md text-headline-md">Agendamento de horário</h1>
+</div>
+<!-- Event Info -->
+<div class="flex flex-col gap-4 text-on-surface-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<span class="font-body-md font-bold text-on-surface">1 h</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-surface">10:00 - 11:00</span>
+<span class="font-label-sm text-label-sm">sexta-feira, 22 maio 2026</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">public</span>
+<span class="font-label-sm text-label-sm uppercase">Horário de Brasília</span>
+</div>
+</div>
+<!-- Step Indicators (Derived from SideNavBar tab_labels) -->
+<nav class="mt-8 flex flex-col gap-4">
+<div class="flex items-center gap-4 text-on-surface-variant opacity-50">
+<span class="material-symbols-outlined">info</span>
+<span class="font-body-md">Meeting Details</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant opacity-50">
+<span class="material-symbols-outlined">schedule</span>
+<span class="font-body-md">Duration</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant opacity-50">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-body-md">Calendar</span>
+</div>
+<div class="flex items-center gap-4 active-tab">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-md">Booking</span>
+</div>
+</nav>
+</div>
+<!-- Footer links in sidebar -->
+<div class="mt-auto pt-8 flex flex-col gap-2">
+<a class="text-label-sm font-label-sm text-primary hover:underline" href="#">Help Center</a>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant text-base">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant text-base">security</span>
+</div>
+</div>
+</aside>
+<!-- Main Form Content -->
+<section class="flex-grow p-gutter md:p-margin-desktop bg-surface relative">
+<!-- Ribbon/Label -->
+<div class="absolute top-0 right-0 bg-on-surface text-surface py-2 px-8 transform rotate-45 translate-x-[30%] translate-y-[-10%] negroni-border z-10 shadow-lg hidden md:block">
+<span class="font-label-sm text-[10px] uppercase tracking-widest font-bold">Desenvolvido por Calendly</span>
+</div>
+<div class="max-w-xl">
+<h2 class="font-headline-lg text-headline-lg mb-8">Preencha os Campos</h2>
+<form class="space-y-6">
+<!-- Name Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm font-bold" for="name">Nome *</label>
+<input class="w-full h-12 px-4 negroni-border rounded-lg bg-surface focus:ring-0 focus:border-primary-container transition-all outline-none font-body-md" id="name" name="name" placeholder="Seu nome completo" required="" type="text"/>
+</div>
+<!-- Email Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm font-bold" for="email">E-mail *</label>
+<input class="w-full h-12 px-4 negroni-border rounded-lg bg-surface focus:ring-0 focus:border-primary-container transition-all outline-none font-body-md" id="email" name="email" placeholder="seu@email.com" required="" type="email"/>
+</div>
+<!-- Add Guests Button -->
+<div>
+<button class="px-6 py-2 negroni-border rounded-full font-label-sm text-label-sm text-primary font-bold hover:bg-primary-container hover:text-white transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-lg">group_add</span>
+                            Adicionar convidados
+                        </button>
+</div>
+<!-- Location Radio Options -->
+<div class="flex flex-col gap-4">
+<label class="font-label-sm text-label-sm font-bold">Local *</label>
+<div class="flex flex-col gap-3">
+<label class="flex items-center gap-3 p-3 negroni-border rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors group">
+<input class="w-5 h-5 text-primary border-2 border-on-surface focus:ring-offset-0 focus:ring-0" name="location" type="radio" value="skla"/>
+<span class="material-symbols-outlined text-pink-500" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-body-md font-bold">Produtora SKLA</span>
+</label>
+<label class="flex items-center gap-3 p-3 negroni-border rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors group">
+<input class="w-5 h-5 text-primary border-2 border-on-surface focus:ring-offset-0 focus:ring-0" name="location" type="radio" value="meet"/>
+<img alt="Google Meet" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUxiz23jjYwFpEShClMTdQFVJPgIkFudtwOjUEPeTG6N38wv2dk8quXwWbqna02zjOLB8djueuGmeAkDRqgXgEEs4yveKdyD13B3nL6GsvfefxNi_Wy9c-vDIw_8C5ehb7yLA1OM_W3HyUq17zoLwYQ5g1vOjzcMf1yeZq1XbhfiQnCYY-0-U--HmD3qiHTb_yduOCmYFyxn6fdWBJar7-7c76CXsYj0E-SJcSj4MpUAzFNdijaPMwUduvIKTSAJ5GF3_OYbMzCywo"/>
+<span class="font-body-md font-bold">Google Meet</span>
+</label>
+<label class="flex items-center gap-3 p-3 negroni-border rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors group">
+<input class="w-5 h-5 text-primary border-2 border-on-surface focus:ring-offset-0 focus:ring-0" name="location" type="radio" value="other"/>
+<span class="material-symbols-outlined text-blue-600" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="font-body-md font-bold">Outro local</span>
+</label>
+</div>
+</div>
+<!-- Textarea for Service -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm font-bold" for="service">Qual serviço você está agendando? *</label>
+<textarea class="w-full p-4 negroni-border rounded-lg bg-surface focus:ring-0 focus:border-primary-container transition-all outline-none font-body-md resize-none" id="service" name="service" placeholder="Descreva brevemente o serviço desejado..." required="" rows="3"></textarea>
+</div>
+<!-- Legal Text -->
+<div class="pt-4">
+<p class="text-label-sm font-label-sm text-on-surface-variant leading-relaxed">
+                            Ao prosseguir, você confirma que leu e concorda com os 
+                            <a class="text-primary font-bold hover:underline" href="#">Termos dos convidados do Calendly</a> e 
+                            <a class="text-primary font-bold hover:underline" href="#">Aviso de Privacidade</a>.
+                        </p>
+</div>
+<!-- Submit Button -->
+<div class="pt-6">
+<button class="w-full md:w-auto px-12 h-14 bg-primary-container text-white negroni-border rounded-full font-headline-md text-headline-md hard-shadow-hover transition-all flex items-center justify-center gap-3" type="submit">
+                            Agendar Evento
+                        </button>
+</div>
+</form>
+</div>
+</section>
+</main>
+<!-- Global Footer -->
+<footer class="w-full border-t-2 border-on-surface bg-surface-container-low mt-auto py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Produtora Skla. Powered by the Solid Edge.</p>
+<div class="flex gap-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Accessibility</a>
+</div>
+</footer>
+</body></html>

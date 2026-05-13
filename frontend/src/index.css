@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #532CB7;
+  --color-secondary: #FEC200;
+  --color-brand-black: #000000;
+  
+  --font-negroni: "orig_ca_negroni_light", sans-serif;
+}
+
+@font-face {
+  font-family: 'orig_ca_negroni_light';
+  src: url('/fonts/orig_ca_negroni_light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  @apply text-brand-black bg-white font-negroni;
+}
+
+.font-negroni {
+  @apply font-negroni;
+}

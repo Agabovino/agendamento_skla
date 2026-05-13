@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#ffdf9b",
+                        "on-secondary-container": "#6d5200",
+                        "surface-dim": "#dadada",
+                        "on-secondary-fixed": "#251a00",
+                        "secondary": "#785a00",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-primary-fixed-variant": "#4e26b2",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#f8be00",
+                        "tertiary": "#343434",
+                        "error": "#ba1a1a",
+                        "primary-container": "#532cb7",
+                        "surface-variant": "#e2e2e2",
+                        "inverse-on-surface": "#f0f1f1",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f3f3f4",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "on-tertiary-container": "#bbbbbb",
+                        "background": "#f9f9f9",
+                        "on-surface-variant": "#494554",
+                        "primary-fixed": "#e8deff",
+                        "on-secondary-fixed-variant": "#5a4300",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-fixed": "#20005f",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-primary-container": "#c3b0ff",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#ffc305",
+                        "tertiary-container": "#4b4b4b",
+                        "surface-tint": "#6743cb",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-background": "#1a1c1c",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "surface-container": "#eeeeee",
+                        "primary-fixed-dim": "#cdbdff",
+                        "primary": "#3c00a0",
+                        "outline": "#7a7585",
+                        "outline-variant": "#cac3d6",
+                        "inverse-primary": "#cdbdff",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "margin-desktop": "40px",
+                        "container-max": "1280px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "label-sm": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-lg": ["Sora"],
+                        "body-md": ["Sora"],
+                        "headline-md": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["13px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hard-shadow {
+            box-shadow: 4px 4px 0px 0px #000000;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #494554;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col items-center justify-center p-base md:p-margin-desktop">
+<!-- Main Container -->
+<main class="w-full max-w-[1060px] min-h-[700px] bg-surface-container-lowest border-2 border-on-surface rounded-xl flex flex-col md:flex-row overflow-hidden relative">
+<!-- Left Sidebar: Profile & Info -->
+<aside class="w-full md:w-80 border-r-2 border-on-surface flex flex-col bg-surface-container-low p-8">
+<div class="flex flex-col items-center md:items-start space-y-6 flex-grow">
+<div class="w-24 h-24 rounded-full border-2 border-on-surface overflow-hidden bg-primary-fixed">
+<img alt="Produtora Skla Logo" class="w-full h-full object-cover" data-alt="A professional, modern corporate portrait of a woman in her late 30s with a confident expression. She is set against a clean, minimalist studio background with soft directional lighting that emphasizes clarity and professionalism. The image has a high-contrast aesthetic with sharp details and a sophisticated light-mode atmosphere, aligning with a premium branding identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVlukiYWXz40ptx5bFFn2CBqVz_7KI8qMd-kctRrphKXm8sP-k3r9ncxUKvq8AglbciVhmR3IRi3MdHnD2gQEKK8t_tN--ZZjHGETsogHGLXzdMwATFG5DD9-fzNu-BgbPmeMCcKmsllIXXqWxrs0t0tDcawiOR2bAMl8HJ2w_bIsDgPTErn4seGOTvU3u__ftNhuJNOdX1oquVkLpcfE2qpdldZOnzOdHv0Yt3G3U6YKEH37VEtrVivAXwYkVS-GpnIDeKifIgTx6"/>
+</div>
+<div class="space-y-2 text-center md:text-left">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Produtora Skla</p>
+<h1 class="font-headline-lg text-headline-lg text-primary-container leading-tight">Agendamento de horário</h1>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-md">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<span>1 h</span>
+</div>
+<p class="text-on-surface-variant font-body-md leading-relaxed">
+                    Reserve seu horário para gravação ou consultoria técnica. Por favor, escolha a data que melhor se adapta à sua agenda.
+                </p>
+</div>
+<!-- Sidebar Footer -->
+<div class="mt-auto pt-8 border-t border-outline-variant flex flex-wrap gap-4">
+<a class="font-label-sm text-label-sm text-primary-container hover:underline" href="#">Configurações de cookies</a>
+<a class="font-label-sm text-label-sm text-primary-container hover:underline" href="#">Política de privacidade</a>
+</div>
+</aside>
+<!-- Center: Calendar Selection -->
+<section class="flex-1 p-8 flex flex-col">
+<header class="mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface">Escolha uma data e horário</h2>
+</header>
+<div class="flex flex-col items-center">
+<!-- Month Selection -->
+<div class="w-full flex items-center justify-between mb-8 max-w-sm">
+<button class="p-2 hover:bg-secondary-container rounded-full border border-transparent transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="font-headline-md text-headline-md">maio 2026</span>
+<button class="p-2 bg-primary-fixed-dim hover:bg-secondary-container rounded-full border border-on-surface transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<!-- Calendar Grid -->
+<div class="w-full max-w-sm">
+<div class="calendar-grid mb-4">
+<!-- Days of Week -->
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">DOM.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">SEG.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">TER.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">QUA.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">QUI.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">SEX.</div>
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-4">SÁB.</div>
+<!-- Calendar Days (Static Layout matching prompt) -->
+<!-- Row 1 -->
+<div class="h-10 flex items-center justify-center text-on-surface-variant opacity-30"></div>
+<div class="h-10 flex items-center justify-center text-on-surface-variant opacity-30"></div>
+<div class="h-10 flex items-center justify-center text-on-surface-variant opacity-30"></div>
+<div class="h-10 flex items-center justify-center text-on-surface-variant opacity-30"></div>
+<div class="h-10 flex items-center justify-center text-on-surface-variant opacity-30"></div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">1</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">2</div>
+<!-- Row 2 -->
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">3</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">4</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">5</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">6</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">7</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">8</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">9</div>
+<!-- Row 3 -->
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">10</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">11</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">12</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">13</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">14</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">15</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">16</div>
+<!-- Row 4 -->
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">17</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">18</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">19</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">20</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">21</div>
+<div class="h-10 flex items-center justify-center bg-primary-container text-white rounded-full border-2 border-on-surface font-bold shadow-sm">22</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">23</div>
+<!-- Row 5 -->
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">24</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">25</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">26</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">27</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">28</div>
+<div class="h-10 flex items-center justify-center bg-primary-fixed-dim rounded-full border border-on-surface font-bold text-primary">29</div>
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">30</div>
+<!-- Row 6 -->
+<div class="h-10 flex items-center justify-center hover:bg-secondary-container/20 rounded cursor-pointer transition-colors">31</div>
+</div>
+</div>
+<!-- Timezone -->
+<div class="w-full max-w-sm mt-8">
+<p class="font-label-sm text-label-sm font-bold mb-2">Fuso horário</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-sm">public</span>
+<span>Horário de Brasília (15:06)</span>
+<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Time Slots -->
+<section class="w-full md:w-80 border-l-2 border-on-surface p-8 flex flex-col overflow-hidden bg-surface-container">
+<header class="mb-6">
+<p class="font-headline-md text-headline-md text-on-surface">sexta-feira, 22 maio</p>
+</header>
+<div class="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-2">
+<!-- Slot 1 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">09:00</button>
+<!-- Slot 2 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">09:30</button>
+<!-- Slot 3: SELECTED STATE -->
+<div class="flex gap-2">
+<button class="flex-1 py-4 bg-tertiary-container text-white border-2 border-on-surface rounded-lg font-bold">10:00</button>
+<button class="flex-1 py-4 bg-primary-container text-white border-2 border-on-surface rounded-lg font-bold hover:-translate-y-0.5 hover:-translate-x-0.5 active:translate-y-0 active:translate-x-0 transition-all hover:hard-shadow">Avançar</button>
+</div>
+<!-- Slot 4 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">10:30</button>
+<!-- Slot 5 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">11:00</button>
+<!-- Slot 6 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">14:00</button>
+<!-- Slot 7 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">14:30</button>
+<!-- Slot 8 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">15:00</button>
+<!-- Slot 9 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">15:30</button>
+<!-- Slot 10 -->
+<button class="w-full py-4 border-2 border-on-surface rounded-lg font-bold text-primary hover:bg-secondary-container transition-all">16:00</button>
+</div>
+</section>
+<!-- Calendly Branding Ribbon (Top Right) -->
+<div class="absolute top-0 right-0 overflow-hidden w-32 h-32 pointer-events-none">
+<div class="absolute top-0 right-0 bg-tertiary-container text-white text-[10px] py-1 px-10 transform translate-x-[30%] translate-y-[100%] rotate-45 border-b-2 border-on-surface">
+<span class="block text-center font-bold uppercase tracking-widest opacity-70">DESENVOLVIDO POR</span>
+<span class="block text-center font-black">Calendly</span>
+</div>
+</div>
+</main>
+<!-- Global Footer Component -->
+<footer class="w-full max-w-[1060px] mt-8 flex flex-col md:flex-row justify-between items-center px-4 md:px-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-4 md:mb-0">
+            © 2024 Produtora Skla. Powered by the Solid Edge.
+        </p>
+<nav class="flex gap-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface hover:underline" href="#">Accessibility</a>
+</nav>
+</footer>
+</body></html>

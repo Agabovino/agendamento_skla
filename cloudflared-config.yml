@@ -1,0 +1,12 @@
+tunnel: 6c6ad132-6fc6-422c-8127-194c0adf16d2
+credentials-file: /etc/cloudflared/tunnel-credentials.json
+
+ingress:
+  - hostname: vivercatolico.com.br
+    service: http://frontend:80
+  - hostname: vivercatolico.com.br
+    path: /api
+    service: http://backend:3000
+  - hostname: www.vivercatolico.com.br
+    service: http://frontend:80
+  - service: http_status:404

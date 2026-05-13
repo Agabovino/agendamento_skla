@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 Int           @id @default(autoincrement())
+  email              String        @unique
+  googleRefreshToken String?
+  appointments       Appointment[]
+}
+
+model Appointment {
+  id          Int      @id @default(autoincrement())
+  hostId      Int
+  host        User     @relation(fields: [hostId], references: [id])
+  clientEmail String
+  startTime   DateTime
+  endTime     DateTime
+
+  @@index([hostId])
+}
