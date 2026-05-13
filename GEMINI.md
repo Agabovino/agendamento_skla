@@ -32,10 +32,18 @@ As referências visuais em `frontend/ref_1.html` e `frontend/ref_2.html` são a 
 
 ## 🛠️ Workflow de Desenvolvimento
 - **Build**: Utilize `docker compose up --build` para garantir que as variáveis do Tailwind v4 e os tipos TypeScript sejam processados corretamente.
+- **Admin Setup**: Acesse `/admin/setup` para conectar a conta do Google que gerenciará a agenda.
 - **Service Names**: 
   - O frontend deve ser nomeado como `app` no Docker Compose para compatibilidade com o túnel.
   - O banco de dados deve ser referenciado como `db`.
-- **Git**: Commits devem seguir o padrão Conventional Commits. O branch principal é `master`.
+
+## 🔐 Segurança e Credenciais (.env)
+As seguintes chaves foram configuradas por padrão para teste:
+- **`ADMIN_PASSWORD`**: `admin123` (Usada para acessar a área restrita).
+- **`ENCRYPTION_KEY`**: Chave interna para criptografar os tokens no banco.
+- **`JWT_SECRET`**: Usada para assinar a sessão do administrador.
+
+*Recomendação: Altere essas senhas no arquivo `.env` antes de colocar o sistema em produção.*
 
 ## 🚀 Comandos Úteis
 ```bash
