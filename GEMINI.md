@@ -1,6 +1,6 @@
-# Projeto Escala - Sistema de Agendamento
+# Projeto SKLA - Sistema de Agendamento
 
-Este documento fornece as diretrizes fundamentais, arquitetura e convenções para o projeto **Escala**, um sistema de agendamento de alta fidelidade para a Produtora Skla.
+Este documento fornece as diretrizes fundamentais, arquitetura e convenções para o projeto **SKLA**, um sistema de agendamento de alta fidelidade para a Produtora Skla.
 
 ## 🎯 Objetivo
 Prover uma interface de agendamento "pixel-perfect" que permite aos usuários reservar horários de 1 hora para gravações e consultorias, com integração ao Google Calendar.
@@ -29,6 +29,10 @@ As referências visuais em `frontend/ref_1.html` e `frontend/ref_2.html` são a 
 2. **Buffer**: Intervalo obrigatório de 30 minutos entre agendamentos de usuários diferentes.
 3. **Regra de Contiguidade**: Usuários podem selecionar múltiplos blocos seguidos. O sistema deve ignorar o buffer de 30 minutos *entre* esses blocos, mantendo-o apenas antes do primeiro e depois do último bloco da sequência.
 4. **Timezone**: Fuso horário padrão de Brasília.
+5. **Admin Master**: Apenas uma conta Google pode ser o admin ativo por vez. Conectar uma nova conta em `/admin/setup` automaticamente remove o privilégio de admin da conta anterior.
+
+## 🗄️ Acesso ao Banco de Dados
+Para instruções detalhadas de como acessar o PostgreSQL e usar o Prisma Studio, consulte o arquivo [DB_ACCESS.md](./DB_ACCESS.md).
 
 ## 🛠️ Workflow de Desenvolvimento
 - **Build**: Utilize `docker compose up --build` para garantir que as variáveis do Tailwind v4 e os tipos TypeScript sejam processados corretamente.

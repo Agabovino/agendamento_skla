@@ -105,7 +105,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
     const { data: userInfo } = await oauth2.userinfo.get();
 
-    await prisma.user.upsert({
+    const user = await prisma.user.upsert({
       where: { googleId: userInfo.id! },
       update: {
         accessToken: encrypt(tokens.access_token!),
@@ -123,6 +123,15 @@ app.get('/api/auth/google/callback', async (req, res) => {
         isAdmin: true
       }
     });
+
+    // Garante que apenas o usuário recém-conectado seja o admin principal
+    await prisma.user.updateMany({
+      where: { 
+        id: { not: user.id } 
+      },
+      data: { isAdmin: false }
+    });
+
     res.redirect('/admin/setup?success=true');
   } catch (e) {
     res.redirect('/admin/setup?error=auth_failed');

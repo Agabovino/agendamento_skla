@@ -21,7 +21,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-primary">Escala</h1>
+            <h1 className="text-3xl font-bold text-primary">SKLA</h1>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Produtora Skla</p>
           </div>
         </div>
@@ -48,7 +48,7 @@ const Login: React.FC = () => {
 
         <div className="pt-4">
           <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">
-            Ao entrar, você permite que o Escala gerencie eventos em sua agenda.
+            Ao entrar, você permite que o SKLA gerencie eventos em sua agenda.
           </p>
         </div>
       </div>

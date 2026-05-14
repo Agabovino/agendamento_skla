@@ -1,0 +1,10 @@
+.env
+node_modules/
+dist/
+.DS_Store
+*.log
+backend/node_modules/
+frontend/node_modules/
+backend/dist/
+frontend/dist/
+frontend/src/assets/hero.png

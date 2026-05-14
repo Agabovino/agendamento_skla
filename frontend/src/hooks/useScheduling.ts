@@ -9,7 +9,11 @@ export interface Slot {
 }
 
 export const useScheduling = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 22)); // Default to May 22, 2026 as per ref
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -20,6 +24,7 @@ export const useScheduling = () => {
     const slots: Slot[] = [];
     const startHour = 9;
     const endHour = 18;
+    const now = new Date();
 
     for (let hour = startHour; hour < endHour; hour++) {
       // Slot at :00
@@ -30,7 +35,7 @@ export const useScheduling = () => {
         time: `${hour.toString().padStart(2, '0')}:00`,
         start: s1,
         end: new Date(s1.getTime() + 60 * 60 * 1000),
-        isAvailable: true, // Mocked
+        isAvailable: s1 > now, // Only available if in the future
       });
 
       // Slot at :30
@@ -41,7 +46,7 @@ export const useScheduling = () => {
         time: `${hour.toString().padStart(2, '0')}:30`,
         start: s2,
         end: new Date(s2.getTime() + 60 * 60 * 1000),
-        isAvailable: true, // Mocked
+        isAvailable: s2 > now, // Only available if in the future
       });
     }
     return slots;

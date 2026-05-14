@@ -117,13 +117,7 @@ const App: React.FC = () => {
         ) : (
           <RegistrationForm onSubmit={handleFormSubmit} />
         )}
-
-        {/* Branding Ribbon */}
-        <div className="absolute top-0 right-0 overflow-hidden w-40 h-40 pointer-events-none hidden md:block">
-          <div className="absolute top-8 right-[-40px] bg-secondary text-brand-black text-[10px] py-1 px-12 transform rotate-45 border-b-2 border-brand-black font-bold uppercase tracking-widest shadow-md">
-            Desenvolvido por Skla
-          </div>
-        </div>
+     
       </main>
 
       <footer className="w-full max-w-[1100px] mt-8 flex flex-col md:flex-row justify-between items-center px-4 md:px-0 text-gray-500 text-xs font-bold uppercase tracking-wider">
