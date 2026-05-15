@@ -11,8 +11,8 @@ const Sidebar: React.FC<{
   isRegistering?: boolean;
 }> = ({ duration, description, preview, onBack, isRegistering }) => {
   return (
-    <aside className="w-full md:w-80 border-r-2 border-brand-black flex flex-col bg-[#F3F3F4] p-8">
-      <div className="flex flex-col items-start space-y-6 flex-grow">
+    <aside className="w-full md:w-80 border-b-2 md:border-b-0 md:border-r-2 border-brand-black flex flex-col bg-[#F3F3F4] p-6">
+      <div className="flex flex-col items-start space-y-4 flex-grow">
         {isRegistering && (
           <button 
             onClick={onBack}
@@ -50,11 +50,6 @@ const Sidebar: React.FC<{
               </div>
             </div>
           )}
-
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary font-fill">public</span>
-            <span className="text-xs font-bold uppercase">Horário de Brasília</span>
-          </div>
 
           {!isRegistering && (
             <p className="text-sm leading-relaxed mt-4">

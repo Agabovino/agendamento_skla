@@ -38,5 +38,8 @@ model SystemSettings {
   id                 Int      @id @default(1)
   adminId            Int?     @unique
   isCalendarConnected Boolean  @default(false)
+  blockEveningSlots  Boolean  @default(false)
+  eveningStartCustom String   @default("17:30")
+  eveningEndCustom   String   @default("22:00")
   updatedAt          DateTime @updatedAt
 }

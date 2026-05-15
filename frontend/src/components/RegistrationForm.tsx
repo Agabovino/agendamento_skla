@@ -25,7 +25,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <section className="flex-1 p-8 md:p-12 bg-white relative overflow-y-auto custom-scrollbar">
+    <section className="flex-1 p-6 md:p-10 bg-white relative overflow-y-auto custom-scrollbar">
       <div className="max-w-xl">
         <h2 className="text-2xl font-bold mb-8">Preencha os Campos</h2>
         

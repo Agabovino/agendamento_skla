@@ -44,6 +44,7 @@ const App: React.FC = () => {
           clientEmail: formData.email,
           clientName: formData.name,
           startTime: schedulingPreview?.start.toISOString(),
+          endTime: schedulingPreview?.end.toISOString(),
           location: formData.location,
           service: formData.service
         }),
@@ -90,9 +91,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 font-negroni">
-      <main className="w-full max-w-[1100px] min-h-[600px] bg-white border-2 border-brand-black rounded-2xl flex flex-col md:flex-row overflow-hidden relative shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-        
+      <main className="w-full max-w-[1100px] h-auto md:h-[600px] bg-white border-2 border-brand-black rounded-2xl flex flex-col md:flex-row overflow-hidden relative shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+
         <Sidebar 
+ 
           duration="1 h"
           description="Reserve seu horário para gravação ou consultoria técnica. Por favor, escolha a data que melhor se adapta à sua agenda."
           preview={schedulingPreview}

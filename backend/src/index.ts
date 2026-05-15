@@ -138,27 +138,100 @@ app.get('/api/auth/google/callback', async (req, res) => {
   }
 });
 
+// --- SYSTEM SETTINGS ---
+app.get('/api/admin/settings', async (req, res) => {
+  const token = req.cookies.admin_token;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    jwt.verify(token, JWT_SECRET);
+    const settings = await prisma.systemSettings.findFirst() || await prisma.systemSettings.create({ data: { id: 1 } });
+    res.json(settings);
+  } catch (e) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+app.post('/api/admin/settings', async (req, res) => {
+  const token = req.cookies.admin_token;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    jwt.verify(token, JWT_SECRET);
+    const { blockEveningSlots, eveningStartCustom, eveningEndCustom } = req.body;
+    const settings = await prisma.systemSettings.upsert({
+      where: { id: 1 },
+      update: { 
+        blockEveningSlots, 
+        eveningStartCustom: eveningStartCustom || undefined, 
+        eveningEndCustom: eveningEndCustom || undefined 
+      },
+      create: { 
+        id: 1, 
+        blockEveningSlots: blockEveningSlots || false,
+        eveningStartCustom: eveningStartCustom || "17:30",
+        eveningEndCustom: eveningEndCustom || "22:00"
+      }
+    });
+    res.json(settings);
+  } catch (e) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
 // --- PUBLIC APPOINTMENTS ---
 app.get('/api/availability', async (req, res) => {
+  const { date } = req.query;
+  if (!date) return res.status(400).json({ error: 'Date is required' });
+
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
   if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });
 
   try {
+    const settings = await prisma.systemSettings.findFirst();
     const auth = await getAuthenticatedClient(admin);
     const calendar = google.calendar({ version: 'v3', auth });
     
-    // Aqui você buscaria eventos reais da agenda do Google
-    // Por enquanto, o frontend gera slots estáticos, então retornamos OK
-    res.json({ status: 'ready' });
+    const startOfDay = new Date(date as string);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date as string);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const response = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: startOfDay.toISOString(),
+      timeMax: endOfDay.toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime',
+      // Force fresh results by ensuring no internal cache is used
+      fields: 'items(start,end,summary),updated', 
+    });
+
+    const busy = response.data.items?.map(event => ({
+      start: event.start?.dateTime || event.start?.date,
+      end: event.end?.dateTime || event.end?.date,
+      title: event.summary
+    })) || [];
+
+    res.json({ 
+      busy, 
+      settings: { 
+        blockEveningSlots: settings?.blockEveningSlots || false,
+        eveningStartCustom: settings?.eveningStartCustom || "17:30",
+        eveningEndCustom: settings?.eveningEndCustom || "22:00"
+      } 
+    });
   } catch (e) {
+    console.error('Error fetching calendar:', e);
     res.status(500).json({ error: 'Failed to fetch availability' });
   }
 });
 
 app.post('/api/appointments', async (req, res) => {
-  const { clientEmail, clientName, startTime, location, service } = req.body;
+  const { clientEmail, clientName, startTime, endTime, location, service } = req.body;
   const start = new Date(startTime);
-  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const end = new Date(endTime);
 
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
   if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });

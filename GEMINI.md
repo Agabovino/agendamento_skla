@@ -14,22 +14,19 @@ O projeto é composto por um monorepo dividido em:
 ## 🎨 Brand Identity (Identidade Visual)
 As referências visuais em `frontend/ref_1.html` e `frontend/ref_2.html` são a **verdade absoluta** para o layout.
 
-### Cores (Tailwind v4 Variables)
-- **Primary**: `#532CB7` (`--color-primary`) - Usada para ações e destaques.
-- **Secondary**: `#FEC200` (`--color-secondary`) - Destaque visual e botões de sucesso.
-- **Brand Black**: `#000000` (`--color-brand-black`) - Bordas, sombras e texto principal.
-- **Surface**: `#F9F9F9` - Cor de fundo principal.
-
-### Tipografia e Estilo
-- **Fonte**: `orig_ca_negroni_light` (deve ser usada em todos os títulos, botões e campos).
+### Layout e Estética
+- **Dimensões**: Container principal com altura fixa de `600px` (desktop) e scroll interno para horários.
+- **Mobile**: Layout responsivo com calendário fixo e seção de horários com scroll interno de `350px`.
 - **Estética**: Bordas sólidas de `2px`, sombras "hard shadow" (`4px 4px 0px 0px #000000`) e arredondamento de bordas `xl`.
 
 ## ⚙️ Regras de Negócio (Business Rules)
 1. **Duração**: Blocos fixos de 1 hora.
-2. **Buffer**: Intervalo obrigatório de 30 minutos entre agendamentos de usuários diferentes.
-3. **Regra de Contiguidade**: Usuários podem selecionar múltiplos blocos seguidos. O sistema deve ignorar o buffer de 30 minutos *entre* esses blocos, mantendo-o apenas antes do primeiro e depois do último bloco da sequência.
-4. **Timezone**: Fuso horário padrão de Brasília.
-5. **Admin Master**: Apenas uma conta Google pode ser o admin ativo por vez. Conectar uma nova conta em `/admin/setup` automaticamente remove o privilégio de admin da conta anterior.
+2. **Buffer**: Intervalo obrigatório de 30 minutos entre agendamentos. O sistema sincroniza em tempo real com o Google Calendar e aplica uma "zona proibida" de 30 minutos ao redor de cada evento existente.
+3. **Janela de Agendamento**: Limite máximo de 90 dias para agendamentos futuros.
+4. **Horários**: Das 09:00 às 22:00.
+5. **Controle Admin**: Possibilidade de bloquear horários noturnos (default 17:30 - 22:00) ou definir um intervalo personalizado no painel `/admin`.
+6. **Regra de Contiguidade**: Usuários podem selecionar múltiplos blocos seguidos. O sistema gera um único evento contínuo no Google Calendar.
+7. **Timezone**: Fuso horário padrão de Brasília (GMT-3).
 
 ## 🗄️ Acesso ao Banco de Dados
 Para instruções detalhadas de como acessar o PostgreSQL e usar o Prisma Studio, consulte o arquivo [DB_ACCESS.md](./DB_ACCESS.md).

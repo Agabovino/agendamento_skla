@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 export interface Slot {
   id: string;
@@ -6,6 +6,11 @@ export interface Slot {
   start: Date;
   end: Date;
   isAvailable: boolean;
+}
+
+interface BusyInterval {
+  start: string;
+  end: string;
 }
 
 export const useScheduling = () => {
@@ -16,41 +21,99 @@ export const useScheduling = () => {
   });
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [busyIntervals, setBusyIntervals] = useState<BusyInterval[]>([]);
+  const [blockEveningSlots, setBlockEveningSlots] = useState(false);
+  const [eveningSettings, setEveningSettings] = useState({ start: "17:30", end: "22:00" });
+
+  // Fetch busy intervals from Google Calendar via Backend
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        // Adiciona um timestamp para evitar cache do navegador/proxy
+        const response = await fetch(`/api/availability?date=${selectedDate.toISOString()}&t=${Date.now()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setBusyIntervals(data.busy || []);
+          setBlockEveningSlots(data.settings?.blockEveningSlots || false);
+          setEveningSettings({
+            start: data.settings?.eveningStartCustom || "17:30",
+            end: data.settings?.eveningEndCustom || "22:00"
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch availability:', error);
+      }
+    };
+
+    fetchAvailability();
+    setSelectedSlots([]); // Limpa seleção ao mudar de data
+  }, [selectedDate]);
 
   // Generate slots for the selected date
-  // Fixed 1-hour slots, but they can start every 30 mins to allow flexibility
-  // Prompt says: "Blocos fixos de 1 hora"
   const availableSlots = useMemo(() => {
     const slots: Slot[] = [];
     const startHour = 9;
-    const endHour = 18;
+    const endHour = 22;
     const now = new Date();
+    const bufferMs = 30 * 60 * 1000;
+
+    const [eStartH, eStartM] = eveningSettings.start.split(':').map(Number);
+    const [eEndH, eEndM] = eveningSettings.end.split(':').map(Number);
 
     for (let hour = startHour; hour < endHour; hour++) {
-      // Slot at :00
-      const s1 = new Date(selectedDate);
-      s1.setHours(hour, 0, 0, 0);
-      slots.push({
-        id: s1.toISOString(),
-        time: `${hour.toString().padStart(2, '0')}:00`,
-        start: s1,
-        end: new Date(s1.getTime() + 60 * 60 * 1000),
-        isAvailable: s1 > now, // Only available if in the future
-      });
+      // Possible start times
+      [0, 30].forEach(minutes => {
+        const slotStart = new Date(selectedDate);
+        slotStart.setHours(hour, minutes, 0, 0);
+        const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
 
-      // Slot at :30
-      const s2 = new Date(selectedDate);
-      s2.setHours(hour, 30, 0, 0);
-      slots.push({
-        id: s2.toISOString(),
-        time: `${hour.toString().padStart(2, '0')}:30`,
-        start: s2,
-        end: new Date(s2.getTime() + 60 * 60 * 1000),
-        isAvailable: s2 > now, // Only available if in the future
+        // Basic availability (future only)
+        let isAvailable = slotStart > now;
+
+        // Block Evening Slots Rule: Custom Range
+        const eveningStart = new Date(selectedDate);
+        eveningStart.setHours(eStartH, eStartM, 0, 0);
+        
+        const eveningEnd = new Date(selectedDate);
+        eveningEnd.setHours(eEndH, eEndM, 0, 0);
+
+        if (blockEveningSlots && slotStart >= eveningStart && slotStart < eveningEnd) {
+          isAvailable = false;
+        }
+
+        // Check against busy intervals and 30min buffer
+        if (isAvailable) {
+          for (const busy of busyIntervals) {
+            const busyStart = new Date(busy.start).getTime();
+            const busyEnd = new Date(busy.end).getTime();
+            const sStart = slotStart.getTime();
+            const sEnd = slotEnd.getTime();
+
+            // The forbidden zone for a new slot is [busyStart - 30m, busyEnd + 30m]
+            // If the slot intersects this zone, it's unavailable.
+            const forbiddenStart = busyStart - bufferMs;
+            const forbiddenEnd = busyEnd + bufferMs;
+
+            const overlapsForbiddenZone = sStart < forbiddenEnd && sEnd > forbiddenStart;
+            
+            if (overlapsForbiddenZone) {
+              isAvailable = false;
+              break;
+            }
+          }
+        }
+
+        slots.push({
+          id: slotStart.toISOString(),
+          time: `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+          start: slotStart,
+          end: slotEnd,
+          isAvailable,
+        });
       });
     }
     return slots;
-  }, [selectedDate]);
+  }, [selectedDate, busyIntervals, blockEveningSlots]);
 
   const toggleSlot = (slotId: string) => {
     setSelectedSlots((prev) => {
@@ -66,9 +129,6 @@ export const useScheduling = () => {
             const diff = sorted[i+1] - sorted[i];
             // 60 minutes = 1 hour in ms
             if (diff > 60 * 60 * 1000) {
-              // Not contiguous, allow only single or previous valid contiguous block?
-              // For better UX, let's just allow it but the preview handles it as one block.
-              // Or better: clear previous and select new if not contiguous.
               return [slotId];
             }
           }
@@ -92,12 +152,6 @@ export const useScheduling = () => {
 
     const firstSlot = sortedSlots[0];
     const lastSlot = sortedSlots[sortedSlots.length - 1];
-    
-    // Check for contiguity to calculate total duration correctly
-    // If contiguous, end is the end of the last slot.
-    // Otherwise, it's a bit ambiguous how to display multiple separate slots.
-    // Usually, these systems allow one contiguous block.
-    // Let's assume contiguous for the preview.
     
     const start = firstSlot.start;
     const end = lastSlot.end;

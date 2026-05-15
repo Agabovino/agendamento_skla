@@ -5,6 +5,24 @@ const AdminSetup: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [status, setStatus] = useState<{ connected: boolean; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [blockEveningSlots, setBlockEveningSlots] = useState(false);
+  const [eveningStart, setEveningStart] = useState("17:30");
+  const [eveningEnd, setEveningEnd] = useState("22:00");
+  const [showCustomTimes, setShowCustomTimes] = useState(false);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/admin/settings');
+      if (res.ok) {
+        const data = await res.json();
+        setBlockEveningSlots(data.blockEveningSlots);
+        setEveningStart(data.eveningStartCustom || "17:30");
+        setEveningEnd(data.eveningEndCustom || "22:00");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const checkStatus = async () => {
     try {
@@ -13,6 +31,7 @@ const AdminSetup: React.FC = () => {
         const data = await res.json();
         setStatus(data);
         setIsLoggedIn(true);
+        fetchSettings();
       }
     } catch (e) {
       console.error(e);
@@ -24,6 +43,38 @@ const AdminSetup: React.FC = () => {
   useEffect(() => {
     checkStatus();
   }, []);
+
+  const saveSettings = async (block: boolean, start: string, end: string) => {
+    try {
+      await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          blockEveningSlots: block,
+          eveningStartCustom: start,
+          eveningEndCustom: end
+        })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleEvening = () => {
+    const newValue = !blockEveningSlots;
+    setBlockEveningSlots(newValue);
+    saveSettings(newValue, eveningStart, eveningEnd);
+  };
+
+  const handleTimeChange = (type: 'start' | 'end', value: string) => {
+    if (type === 'start') {
+      setEveningStart(value);
+      saveSettings(blockEveningSlots, value, eveningEnd);
+    } else {
+      setEveningEnd(value);
+      saveSettings(blockEveningSlots, eveningStart, value);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +140,59 @@ const AdminSetup: React.FC = () => {
               Desconectado
             </p>
           )}
+        </div>
+
+        <div className="p-6 bg-gray-50 border-2 border-brand-black rounded-xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-xs font-bold uppercase text-gray-400">Horários Especiais</p>
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-brand-black">Noite ({eveningStart} - {eveningEnd})</p>
+                <button 
+                  onClick={() => setShowCustomTimes(!showCustomTimes)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+                  title="Personalizar intervalo"
+                >
+                  <span className="material-symbols-outlined text-sm">settings_suggest</span>
+                </button>
+              </div>
+            </div>
+            <button 
+              onClick={handleToggleEvening}
+              className={`w-14 h-8 rounded-full border-2 border-brand-black relative transition-colors ${blockEveningSlots ? 'bg-red-500' : 'bg-green-500'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white border-2 border-brand-black rounded-full transition-all ${blockEveningSlots ? 'left-8' : 'left-1'}`} />
+            </button>
+          </div>
+
+          {showCustomTimes && (
+            <div className="grid grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-1">
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-bold uppercase text-gray-400">Início</label>
+                <input 
+                  type="time" 
+                  value={eveningStart}
+                  onChange={(e) => handleTimeChange('start', e.target.value)}
+                  className="w-full h-10 px-2 border-2 border-brand-black rounded-lg text-sm font-bold outline-none focus:border-primary"
+                />
+              </div>
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-bold uppercase text-gray-400">Fim</label>
+                <input 
+                  type="time" 
+                  value={eveningEnd}
+                  onChange={(e) => handleTimeChange('end', e.target.value)}
+                  className="w-full h-10 px-2 border-2 border-brand-black rounded-lg text-sm font-bold outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+          )}
+
+          <p className="text-[10px] text-gray-500 text-left leading-tight">
+            {blockEveningSlots 
+              ? `Os horários entre ${eveningStart} e ${eveningEnd} estão BLOQUEADOS.` 
+              : `Os horários entre ${eveningStart} e ${eveningEnd} estão LIBERADOS.`}
+          </p>
         </div>
 
         <button 
