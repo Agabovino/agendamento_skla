@@ -75,18 +75,22 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateChange }) => {
         <div className="w-full flex items-center justify-between mb-6 max-w-sm">
           <button 
             onClick={prevMonth}
-            className="p-2 hover:bg-gray-100 rounded-full transition-all"
+            className="p-2 hover:bg-gray-100 rounded-full transition-all flex items-center justify-center"
           >
-            <span className="material-symbols-outlined">chevron_left</span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+            </svg>
           </button>
           <span className="text-lg font-bold capitalize">
             {monthNames[currentMonth]} {currentYear}
           </span>
           <button 
             onClick={nextMonth}
-            className="p-2 hover:bg-gray-100 rounded-full transition-all"
+            className="p-2 hover:bg-gray-100 rounded-full transition-all flex items-center justify-center"
           >
-            <span className="material-symbols-outlined">chevron_right</span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+            </svg>
           </button>
         </div>
 

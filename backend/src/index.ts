@@ -77,7 +77,12 @@ app.get('/api/admin/status', async (req, res) => {
   try {
     jwt.verify(token, JWT_SECRET);
     const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
+    const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
+
     res.json({ 
+      admin: admin ? { connected: !!admin.refreshToken, email: admin.email } : null,
+      employee: employee ? { connected: !!employee.refreshToken, email: employee.email } : null,
+      // Suporte legado (frontend pode estar usando isso para o estado inicial)
       connected: !!admin?.refreshToken,
       email: admin?.email
     });
@@ -85,34 +90,48 @@ app.get('/api/admin/status', async (req, res) => {
     res.status(401).json({ connected: false });
   }
 });
-
 // --- GOOGLE OAUTH FLOW (STILL USED BY ADMIN) ---
 app.get('/api/auth/google', (req, res) => {
-  // Opcional: Proteger essa rota para admin
+  const { role } = req.query; // 'admin' or 'employee'
+  const state = JSON.stringify({ role: role || 'admin' });
+  
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/calendar.events'],
+    state: Buffer.from(state).toString('base64')
   });
   res.redirect(url);
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
   try {
+    const decodedState = JSON.parse(Buffer.from(state as string, 'base64').toString());
+    const role = decodedState.role;
+
     const { tokens } = await oauth2Client.getToken(code as string);
     oauth2Client.setCredentials(tokens);
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
     const { data: userInfo } = await oauth2.userinfo.get();
 
+    const updateData: any = {
+      accessToken: encrypt(tokens.access_token!),
+      refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
+      tokenExpiry: new Date(tokens.expiry_date!),
+    };
+
+    if (role === 'admin') {
+      updateData.isAdmin = true;
+      updateData.isEmployee = false;
+    } else if (role === 'employee') {
+      updateData.isEmployee = true;
+      updateData.isAdmin = false;
+    }
+
     const user = await prisma.user.upsert({
       where: { googleId: userInfo.id! },
-      update: {
-        accessToken: encrypt(tokens.access_token!),
-        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
-        tokenExpiry: new Date(tokens.expiry_date!),
-        isAdmin: true
-      },
+      update: updateData,
       create: {
         googleId: userInfo.id!,
         email: userInfo.email!,
@@ -120,20 +139,33 @@ app.get('/api/auth/google/callback', async (req, res) => {
         accessToken: encrypt(tokens.access_token!),
         refreshToken: encrypt(tokens.refresh_token!),
         tokenExpiry: new Date(tokens.expiry_date!),
-        isAdmin: true
+        isAdmin: role === 'admin',
+        isEmployee: role === 'employee'
       }
     });
 
-    // Garante que apenas o usuário recém-conectado seja o admin principal
-    await prisma.user.updateMany({
-      where: { 
-        id: { not: user.id } 
-      },
-      data: { isAdmin: false }
-    });
+    // Se for admin, garante que apenas ele seja o admin principal
+    if (role === 'admin') {
+      await prisma.user.updateMany({
+        where: { id: { not: user.id }, isAdmin: true },
+        data: { isAdmin: false }
+      });
+      await prisma.systemSettings.updateMany({
+        data: { isCalendarConnected: true }
+      });
+    } else if (role === 'employee') {
+      await prisma.user.updateMany({
+        where: { id: { not: user.id }, isEmployee: true },
+        data: { isEmployee: false }
+      });
+      await prisma.systemSettings.updateMany({
+        data: { isEmployeeConnected: true }
+      });
+    }
 
     res.redirect('/admin/setup?success=true');
   } catch (e) {
+    console.error('Auth error:', e);
     res.redirect('/admin/setup?error=auth_failed');
   }
 });
@@ -185,12 +217,12 @@ app.get('/api/availability', async (req, res) => {
   if (!date) return res.status(400).json({ error: 'Date is required' });
 
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
+  const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
+  
   if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });
 
   try {
     const settings = await prisma.systemSettings.findFirst();
-    const auth = await getAuthenticatedClient(admin);
-    const calendar = google.calendar({ version: 'v3', auth });
     
     const startOfDay = new Date(date as string);
     startOfDay.setHours(0, 0, 0, 0);
@@ -198,24 +230,30 @@ app.get('/api/availability', async (req, res) => {
     const endOfDay = new Date(date as string);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const response = await calendar.events.list({
+    const busySlots: any[] = [];
+
+    // Fetch from Admin
+    const adminAuth = await getAuthenticatedClient(admin);
+    const adminCalendar = google.calendar({ version: 'v3', auth: adminAuth });
+    const adminResponse = await adminCalendar.events.list({
       calendarId: 'primary',
       timeMin: startOfDay.toISOString(),
       timeMax: endOfDay.toISOString(),
       singleEvents: true,
       orderBy: 'startTime',
-      // Force fresh results by ensuring no internal cache is used
       fields: 'items(start,end,summary),updated', 
     });
-
-    const busy = response.data.items?.map(event => ({
-      start: event.start?.dateTime || event.start?.date,
-      end: event.end?.dateTime || event.end?.date,
-      title: event.summary
-    })) || [];
+    
+    if (adminResponse.data.items) {
+      busySlots.push(...adminResponse.data.items.map(event => ({
+        start: event.start?.dateTime || event.start?.date,
+        end: event.end?.dateTime || event.end?.date,
+        title: event.summary
+      })));
+    }
 
     res.json({ 
-      busy, 
+      busy: busySlots, 
       settings: { 
         blockEveningSlots: settings?.blockEveningSlots || false,
         eveningStartCustom: settings?.eveningStartCustom || "17:30",
@@ -223,7 +261,7 @@ app.get('/api/availability', async (req, res) => {
       } 
     });
   } catch (e) {
-    console.error('Error fetching calendar:', e);
+    console.error('Error fetching calendars:', e);
     res.status(500).json({ error: 'Failed to fetch availability' });
   }
 });
@@ -234,6 +272,8 @@ app.post('/api/appointments', async (req, res) => {
   const end = new Date(endTime);
 
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
+  const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
+  
   if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });
 
   try {
@@ -254,17 +294,37 @@ app.post('/api/appointments', async (req, res) => {
     const auth = await getAuthenticatedClient(admin);
     const calendar = google.calendar({ version: 'v3', auth });
 
+    const eventBody = {
+      summary: `${service || 'Agendamento'} - ${clientName}`,
+      description: `Serviço: ${service}\nLocal: ${location}\nCliente: ${clientEmail}`,
+      start: { dateTime: start.toISOString() },
+      end: { dateTime: end.toISOString() },
+      attendees: [{ email: clientEmail }],
+    };
+
     await calendar.events.insert({
       calendarId: 'primary',
-      requestBody: {
-        summary: `${service || 'Agendamento'} - ${clientName}`,
-        description: `Serviço: ${service}\nLocal: ${location}\nCliente: ${clientEmail}`,
-        start: { dateTime: start.toISOString() },
-        end: { dateTime: end.toISOString() },
-        attendees: [{ email: clientEmail }],
-      },
+      requestBody: eventBody,
       sendUpdates: 'all',
     });
+
+    // 3. Inserir no Google Calendar do Funcionário
+    if (employee && employee.refreshToken) {
+      try {
+        const empAuth = await getAuthenticatedClient(employee);
+        const empCalendar = google.calendar({ version: 'v3', auth: empAuth });
+        await empCalendar.events.insert({
+          calendarId: 'primary',
+          requestBody: {
+            ...eventBody,
+            description: `${eventBody.description}\n(Cópia Funcionário)`
+          },
+          sendUpdates: 'none',
+        });
+      } catch (empErr) {
+        console.error('Error adding event to employee calendar:', empErr);
+      }
+    }
 
     res.status(201).json(appointment);
   } catch (error) {

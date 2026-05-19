@@ -21,12 +21,15 @@ As referências visuais em `frontend/ref_1.html` e `frontend/ref_2.html` são a 
 
 ## ⚙️ Regras de Negócio (Business Rules)
 1. **Duração**: Blocos fixos de 1 hora.
-2. **Buffer**: Intervalo obrigatório de 30 minutos entre agendamentos. O sistema sincroniza em tempo real com o Google Calendar e aplica uma "zona proibida" de 30 minutos ao redor de cada evento existente.
-3. **Janela de Agendamento**: Limite máximo de 90 dias para agendamentos futuros.
-4. **Horários**: Das 09:00 às 22:00.
-5. **Controle Admin**: Possibilidade de bloquear horários noturnos (default 17:30 - 22:00) ou definir um intervalo personalizado no painel `/admin`.
-6. **Regra de Contiguidade**: Usuários podem selecionar múltiplos blocos seguidos. O sistema gera um único evento contínuo no Google Calendar.
-7. **Timezone**: Fuso horário padrão de Brasília (GMT-3).
+2. **Buffer**: Intervalo obrigatório de 30 minutos entre agendamentos.
+3. **Google Calendar Integration**:
+   - **Conta Principal**: Define a disponibilidade real do sistema. Eventos nesta conta bloqueiam horários no front-end.
+   - **Conta Funcionário**: Conectada opcionalmente no painel admin. Recebe uma cópia de todos os agendamentos realizados, mas compromissos pessoais nesta conta NÃO alteram a disponibilidade pública.
+4. **Janela de Agendamento**: Limite máximo de 90 dias para agendamentos futuros.
+5. **Horários**: Das 09:00 às 22:00.
+6. **Controle Admin**: Possibilidade de bloquear horários noturnos (default 17:30 - 22:00) ou definir um intervalo personalizado no painel `/admin`.
+7. **Regra de Contiguidade**: Usuários podem selecionar múltiplos blocos seguidos. O sistema gera um único evento contínuo no Google Calendar.
+8. **Timezone**: Fuso horário padrão de Brasília (GMT-3).
 
 ## 🗄️ Acesso ao Banco de Dados
 Para instruções detalhadas de como acessar o PostgreSQL e usar o Prisma Studio, consulte o arquivo [DB_ACCESS.md](./DB_ACCESS.md).

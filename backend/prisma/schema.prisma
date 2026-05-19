@@ -15,6 +15,7 @@ model User {
   refreshToken       String?
   tokenExpiry        DateTime?
   isAdmin            Boolean       @default(false)
+  isEmployee         Boolean       @default(false)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   appointments       Appointment[]
@@ -35,11 +36,12 @@ model Appointment {
 }
 
 model SystemSettings {
-  id                 Int      @id @default(1)
-  adminId            Int?     @unique
-  isCalendarConnected Boolean  @default(false)
-  blockEveningSlots  Boolean  @default(false)
-  eveningStartCustom String   @default("17:30")
-  eveningEndCustom   String   @default("22:00")
-  updatedAt          DateTime @updatedAt
+  id                   Int      @id @default(1)
+  adminId              Int?     @unique
+  isCalendarConnected  Boolean  @default(false)
+  isEmployeeConnected  Boolean  @default(false)
+  blockEveningSlots    Boolean  @default(false)
+  eveningStartCustom   String   @default("17:30")
+  eveningEndCustom     String   @default("22:00")
+  updatedAt            DateTime @updatedAt
 }
