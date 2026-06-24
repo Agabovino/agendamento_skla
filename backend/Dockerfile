@@ -7,7 +7,7 @@ RUN npm install
 
 COPY prisma ./prisma
 COPY prisma.config.ts ./prisma.config.ts
-COPY .env .env
+# .env NÃO é copiado aqui — use variáveis de ambiente no docker-compose.yml
 RUN npx prisma generate
 
 COPY . .
