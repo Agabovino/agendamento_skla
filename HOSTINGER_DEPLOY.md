@@ -129,3 +129,8 @@ DATABASE_URL="sua_url_do_pooler_com_senha_url_encoded" npx prisma db push
   Conexão com o banco efetuada com sucesso! Acesse `/admin/setup` e configure a conta do Google para carregar as configurações iniciais.
 * **Erro: `Can't reach database server at 2600:...`**:
   O Node.js ainda está tentando conectar via IPv6. Certifique-se de que o host da `DATABASE_URL` no `.env` foi alterado para o Pooler (`pooler.supabase.com`) e o `dotenv.config` está com `override: true`.
+* **Erro: `DriverAdapterError: (ENOTFOUND) tenant/user ... not found`**:
+  Isso ocorre se o projeto do Supabase estiver pausado (no plano gratuito do Supabase, projetos inativos por dias são pausados automaticamente) ou se a região da URL do pooler (`aws-1-[regiao].pooler.supabase.com`) estiver incorreta. Ative o projeto no painel do Supabase ("Resume Project") e verifique se a região na URL está correta (ex: `us-east-1` ou `sa-east-1`).
+* **Erro: `Request had insufficient authentication scopes` (ao duplicar agendamento para funcionário)**:
+  A conta do funcionário foi conectada no passado com permissões insuficientes. Acesse `/admin/setup`, desconecte a conta do funcionário e reconecte-a para forçar o consentimento dos novos escopos de escrita no Google Calendar.
+

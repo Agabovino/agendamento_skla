@@ -167,6 +167,40 @@ app.get('/api/auth/google/callback', async (req, res) => {
       await prisma.systemSettings.updateMany({
         data: { isEmployeeConnected: true }
       });
+
+      // Sync retroativo: copiar todos os agendamentos futuros para o Calendar do funcionário
+      try {
+        const futureAppointments = await prisma.appointment.findMany({
+          where: { startTime: { gte: new Date() } },
+          orderBy: { startTime: 'asc' }
+        });
+
+        if (futureAppointments.length > 0) {
+          const empAuth = await getAuthenticatedClient(user);
+          const empCalendar = google.calendar({ version: 'v3', auth: empAuth });
+
+          for (const appt of futureAppointments) {
+            try {
+              await empCalendar.events.insert({
+                calendarId: 'primary',
+                requestBody: {
+                  summary: `${appt.service || 'Agendamento'} - ${appt.clientName}`,
+                  description: `Serviço: ${appt.service}\nLocal: ${appt.location}\nCliente: ${appt.clientEmail}\n(Cópia Funcionário - Sync Retroativo)`,
+                  start: { dateTime: appt.startTime.toISOString() },
+                  end: { dateTime: appt.endTime.toISOString() },
+                  attendees: [{ email: appt.clientEmail }],
+                },
+                sendUpdates: 'none',
+              });
+            } catch (syncErr) {
+              console.error(`Error syncing appointment ${appt.id} to employee calendar:`, syncErr);
+            }
+          }
+          console.log(`Retroactive sync: ${futureAppointments.length} appointments synced to employee calendar.`);
+        }
+      } catch (syncError) {
+        console.error('Error during retroactive sync to employee calendar:', syncError);
+      }
     }
 
     res.redirect('/admin/setup?success=true');
