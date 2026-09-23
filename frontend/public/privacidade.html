@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — SKLA Vídeo</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F9F9F9;
+      --card-bg: #FFFFFF;
+      --text: #1A1A1A;
+      --text-muted: #555555;
+      --border: #E5E7EB;
+      --border-dark: #111111;
+      --primary: #111111;
+      --accent: #2563EB;
+      --accent-bg: #EFF6FF;
+      --accent-border: #BFDBFE;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Sora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px 16px 64px;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      border-bottom: 2px solid var(--border-dark);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 0.9rem;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+    }
+    .nav-links a.active {
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 2px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 4px 4px 0px 0px #000000;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+    .last-updated {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      display: inline-block;
+      background: #F3F4F6;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    p {
+      margin-bottom: 14px;
+      color: #333333;
+      font-size: 0.975rem;
+    }
+    ul, ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: #333333;
+      font-size: 0.975rem;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    strong {
+      color: #000000;
+      font-weight: 700;
+    }
+    .callout {
+      background-color: var(--accent-bg);
+      border: 2px solid var(--accent-border);
+      border-left: 6px solid var(--accent);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .callout h3 {
+      font-size: 1.05rem;
+      color: #1E40AF;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .callout p {
+      color: #1E3A8A;
+      margin-bottom: 8px;
+    }
+    .callout p:last-child {
+      margin-bottom: 0;
+    }
+    .badge {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #92400E;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    footer a {
+      color: var(--text);
+      text-decoration: underline;
+    }
+    @media (max-width: 640px) {
+      .card {
+        padding: 24px 18px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="brand">
+        <img src="/skla_logo.png" alt="SKLA Vídeo" onerror="this.style.display='none'">
+        <span class="brand-title">SKLA Vídeo</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/">Agendamento</a>
+        <a href="/privacidade" class="active">Privacidade</a>
+        <a href="/termos">Termos de Serviço</a>
+      </nav>
+    </header>
+
+    <main class="card">
+      <h1>Política de Privacidade</h1>
+      <span class="last-updated">Última atualização: 22 de setembro de 2026</span>
+
+      <p>
+        A <strong>SKLA Vídeo</strong> ("nós", "nosso" ou "aplicação"), acessível através do endereço 
+        <strong>agendamento.skla.video</strong>, valoriza e respeita a privacidade de seus usuários e clientes. 
+        Esta Política de Privacidade explica de forma transparente como coletamos, usamos, armazenamos, tratamos 
+        e protegemos seus dados pessoais em total conformidade com a <strong>Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018)</strong> 
+        e com as diretrizes de proteção de dados das plataformas parceiras, incluindo o <strong>Google</strong>.
+      </p>
+
+      <h2>1. Sobre a Aplicação</h2>
+      <p>
+        A plataforma <strong>agendamento.skla.video</strong> é um sistema web dedicado ao agendamento de horários para 
+        sessões de gravação, produções audiovisuais, podcasts e consultorias com a equipe da SKLA Vídeo.
+      </p>
+
+      <h2>2. Dados Coletados</h2>
+      <p>Para a prestação do serviço de agendamento, coletamos exclusivamente as seguintes informações:</p>
+      <ul>
+        <li><strong>Dados fornecidos diretamente pelo cliente ao agendar:</strong> Nome completo, endereço de e-mail, número de WhatsApp/telefone, data e horário selecionados, e eventuais anotações sobre o serviço desejado.</li>
+        <li><strong>Dados de acesso técnico:</strong> Endereço IP, tipo de navegador, registros de requisição (logs técnicos estritamente necessários para a segurança e estabilidade da infraestrutura).</li>
+      </ul>
+
+      <h2>3. Integração com a API do Google (Google Calendar)</h2>
+      <p>
+        Para garantir que os agendamentos sejam sincronizados em tempo real e evitar conflitos de horários, 
+        a aplicação integra-se à <strong>Google Calendar API</strong> por meio do protocolo seguro <strong>OAuth 2.0</strong>.
+      </p>
+
+      <div class="callout">
+        <h3><span class="badge">Google OAuth</span> Declaração de Acesso e Uso de Dados do Google</h3>
+        <p><strong>Escopos Solicitados:</strong> <code>https://www.googleapis.com/auth/calendar.events</code> (ou <code>calendar.events.readonly</code> para consulta e <code>calendar.events</code> para inserção de agendamentos).</p>
+        <p><strong>Como acessamos:</strong> A conexão é estabelecida mediante consentimento expresso do administrador e da equipe responsável da SKLA via tela de autorização oficial do Google OAuth.</p>
+        <p><strong>Finalidade exclusiva:</strong> Os dados de calendário são acessados <strong>exclusivamente</strong> para:</p>
+        <ol style="margin-top: 8px; margin-bottom: 8px;">
+          <li><strong>Verificação de Disponibilidade:</strong> Ler a lista de eventos de calendário existentes na agenda da SKLA para identificar horários ocupados e calcular os blocos de horário livres exibidos ao público no site.</li>
+          <li><strong>Inserção do Agendamento:</strong> Criar automaticamente um novo evento no Google Calendar contendo os detalhes do serviço agendado pelo cliente quando uma reserva for confirmada.</li>
+        </ol>
+        <p>
+          <strong>Nenhum evento pessoal é lido, transmitido ou compartilhado publicamente:</strong> O sistema apenas verifica se determinado bloco de tempo está ocupado ou livre, não divulgando títulos, descrições ou participantes de outros compromissos previamente agendados na conta do Google.
+        </p>
+      </div>
+
+      <div class="callout" style="border-left-color: #059669; background-color: #ECFDF5; border-color: #A7F3D0;">
+        <h3 style="color: #065F46;">Conformidade com a Política de Dados do Usuário dos Serviços de API do Google</h3>
+        <p style="color: #064E3B;">
+          O uso e a transferência para qualquer outro aplicativo de informações recebidas das APIs do Google cumprirão a 
+          <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style="color: #047857; font-weight: 700; text-decoration: underline;">
+            Política de Dados do Usuário dos Serviços de API do Google
+          </a>, incluindo os requisitos de <strong>Uso Limitado (Limited Use Requirements)</strong>.
+        </p>
+        <p style="color: #064E3B; margin-top: 8px;">
+          <strong>Não Venda e Não Compartilhamento:</strong> Nós <strong>NÃO vendemos</strong>, não alugamos, não comercializamos e não transferimos dados obtidos através da API do Google Calendar para terceiros, corretores de dados, empresas de publicidade ou ferramentas de marketing.
+        </p>
+        <p style="color: #064E3B; margin-top: 8px;">
+          <strong>Não Utilização para Inteligência Artificial:</strong> Os dados obtidos via Google Calendar <strong>NÃO são utilizados</strong> para alimentar, treinar ou aprimorar modelos de linguagem (LLMs) ou algoritmos de inteligência artificial generativa.
+        </p>
+      </div>
+
+      <h2>4. Armazenamento e Segurança dos Dados</h2>
+      <p>
+        A segurança dos seus dados é prioritária. Adotamos padrões técnicos robustos para resguardar as informações:
+      </p>
+      <ul>
+        <li><strong>Criptografia em Repouso:</strong> Tokens de acesso OAuth (Access Token e Refresh Token) são salvos no banco de dados de maneira fortemente criptografada utilizando algoritmo <strong>AES-256</strong>.</li>
+        <li><strong>Criptografia em Trânsito:</strong> Toda a comunicação entre o seu navegador, o servidor da aplicação e as APIs do Google é transmitida via protocolo criptografado <strong>HTTPS / TLS</strong>.</li>
+        <li><strong>Controle de Acesso Restrito:</strong> Somente administradores autenticados com credenciais seguras têm permissão para configurar a integração com o Google Calendar.</li>
+      </ul>
+
+      <h2>5. Retenção e Exclusão de Dados</h2>
+      <p>
+        Os dados de agendamento são mantidos apenas pelo período necessário para a realização da sessão agendada e eventual histórico administrativo/financeiro.
+      </p>
+      <p>
+        <strong>Exclusão de Dados e Desconexão do Google:</strong>
+      </p>
+      <ul>
+        <li>O administrador pode desconectar a conta do Google a qualquer momento através do painel de administração da plataforma, o que resulta na imediata exclusão dos tokens de acesso e autorizações armazenadas em nosso banco de dados.</li>
+        <li>O usuário também pode revogar o acesso do aplicativo diretamente a qualquer momento através das configurações de segurança de sua Conta Google em 
+          <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">myaccount.google.com/permissions</a>.
+        </li>
+        <li>Clientes que desejarem a exclusão de seus registros de agendamento podem solicitar a qualquer momento através do nosso e-mail de contato.</li>
+      </ul>
+
+      <h2>6. Bases Legais para o Tratamento (LGPD - Art. 7º)</h2>
+      <p>O tratamento de dados pessoais pela SKLA Vídeo baseia-se nas seguintes hipóteses legais previstas pela LGPD:</p>
+      <ul>
+        <li><strong>Execução de Contrato ou Procedimentos Preliminares (Art. 7º, V):</strong> Para viabilizar a reserva e a realização da sessão de gravação solicitada.</li>
+        <li><strong>Consentimento do Titular (Art. 7º, I):</strong> Mediante a autorização explícita do fluxo OAuth para integração de agendas.</li>
+        <li><strong>Legítimo Interesse (Art. 7º, IX):</strong> Para aprimoramento da segurança, prevenção de fraudes e bom funcionamento do sistema.</li>
+      </ul>
+
+      <h2>7. Direitos do Titular dos Dados</h2>
+      <p>Em conformidade com o Artigo 18 da LGPD, você possui o direito de, a qualquer momento e mediante requisição:</p>
+      <ul>
+        <li>Confirmar a existência de tratamento de seus dados;</li>
+        <li>Acessar os dados que possuímos sobre você;</li>
+        <li>Solicitar a correção de dados incompletos, inexatos ou desatualizados;</li>
+        <li>Solicitar a eliminação dos dados pessoais tratados;</li>
+        <li>Revogar o seu consentimento de forma simples e gratuita.</li>
+      </ul>
+
+      <h2>8. Compartilhamento com Terceiros</h2>
+      <p>
+        Seus dados pessoais não são compartilhados com terceiros, exceto com os provedores estritamente necessários para a operação técnica da plataforma (como serviços de hospedagem em nuvem e banco de dados que operam sob rigorosos acordos de confidencialidade e segurança) ou mediante obrigação legal.
+      </p>
+
+      <h2>9. Contato e Encarregado de Proteção de Dados (DPO)</h2>
+      <p>
+        Para dúvidas sobre esta Política de Privacidade, exercício dos direitos previstos na LGPD ou esclarecimentos sobre o uso dos dados do Google Calendar, entre em contato conosco:
+      </p>
+      <ul>
+        <li><strong>Responsável:</strong> SKLA Vídeo — Produções Audiovisuais</li>
+        <li><strong>E-mail de Contato:</strong> <a href="mailto:contato@skla.video">contato@skla.video</a></li>
+        <li><strong>Domínio oficial:</strong> <a href="https://agendamento.skla.video">https://agendamento.skla.video</a></li>
+      </ul>
+
+      <h2>10. Alterações nesta Política</h2>
+      <p>
+        Esta Política de Privacidade poderá ser atualizada periodicamente para refletir melhorias no sistema ou mudanças regulatórias. Recomendamos a consulta regular desta página. A data da versão mais recente estará sempre indicada no topo deste documento.
+      </p>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 SKLA Vídeo. Todos os direitos reservados. | <a href="/termos">Termos de Serviço</a></p>
+    </footer>
+  </div>
+</body>
+</html>
