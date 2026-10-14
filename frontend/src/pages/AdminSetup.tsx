@@ -4,8 +4,8 @@ const AdminSetup: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [status, setStatus] = useState<{ 
-    admin: { connected: boolean; email?: string } | null;
-    employee: { connected: boolean; email?: string } | null;
+    admin: { connected: boolean; email?: string; needsReconnect?: boolean } | null;
+    employee: { connected: boolean; email?: string; needsReconnect?: boolean } | null;
     connected: boolean; // Legacy
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,7 @@ const AdminSetup: React.FC = () => {
   const [eveningStart, setEveningStart] = useState("17:30");
   const [eveningEnd, setEveningEnd] = useState("22:00");
   const [showCustomTimes, setShowCustomTimes] = useState(false);
+  const authResult = new URLSearchParams(window.location.search);
 
   const fetchSettings = async () => {
     try {
@@ -127,6 +128,28 @@ const AdminSetup: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9] font-negroni py-12">
       <div className="max-w-xl w-full bg-white border-2 border-brand-black rounded-2xl p-12 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] text-center space-y-8">
         <h1 className="text-3xl font-bold text-primary">Configuração</h1>
+
+        {authResult.get('success') && (
+          <div className="p-4 bg-green-50 border-2 border-green-600 rounded-xl text-sm font-bold text-green-700">
+            Conta Google conectada com sucesso.
+          </div>
+        )}
+        {authResult.get('error') && (
+          <div className="p-4 bg-red-50 border-2 border-red-500 rounded-xl text-sm font-bold text-red-600">
+            Não foi possível conectar a conta Google. Tente novamente.
+          </div>
+        )}
+        {(status?.admin?.needsReconnect || status?.employee?.needsReconnect) && (
+          <div className="p-4 bg-red-50 border-2 border-red-500 rounded-xl text-left space-y-1">
+            <p className="text-sm font-bold text-red-600">⚠️ Ação necessária: reconecte a agenda</p>
+            <p className="text-xs text-red-600 leading-snug">
+              {status?.admin?.needsReconnect
+                ? 'O Google encerrou o acesso à agenda principal. Enquanto ela não for reconectada, os clientes NÃO conseguem agendar.'
+                : 'O Google encerrou o acesso à agenda do funcionário. Os agendamentos continuam funcionando, mas não são copiados para ela.'}
+              {' '}Clique em "Reconectar" e entre com a conta indicada.
+            </p>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-6 bg-gray-50 border-2 border-brand-black rounded-xl space-y-4 flex flex-col justify-between">
@@ -141,10 +164,13 @@ const AdminSetup: React.FC = () => {
                   <p className="text-[10px] text-gray-600 truncate">{status.admin.email}</p>
                 </div>
               ) : (
-                <p className="text-red-500 font-bold flex items-center justify-center gap-2 text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
-                  Desconectado
-                </p>
+                <div className="space-y-1">
+                  <p className="text-red-500 font-bold flex items-center justify-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+                    {status?.admin?.needsReconnect ? 'Conexão expirada' : 'Desconectado'}
+                  </p>
+                  {status?.admin?.email && <p className="text-[10px] text-gray-600 truncate">{status.admin.email}</p>}
+                </div>
               )}
             </div>
             <button 
@@ -152,7 +178,7 @@ const AdminSetup: React.FC = () => {
               className="w-full h-10 bg-secondary text-brand-black border-2 border-brand-black rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:-translate-y-1 transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
-              {status?.admin?.connected ? 'Reconectar' : 'Conectar Principal'}
+              {status?.admin?.connected || status?.admin?.needsReconnect ? 'Reconectar' : 'Conectar Principal'}
             </button>
           </div>
 
@@ -164,6 +190,14 @@ const AdminSetup: React.FC = () => {
                   <p className="text-green-600 font-bold flex items-center justify-center gap-2 text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-60-240 254-254-56-56-198 198-90-90-56 56 146 146Z"/></svg>
                     Conectado
+                  </p>
+                  <p className="text-[10px] text-gray-600 truncate">{status.employee.email}</p>
+                </div>
+              ) : status?.employee?.needsReconnect ? (
+                <div className="space-y-1">
+                  <p className="text-red-500 font-bold flex items-center justify-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+                    Conexão expirada
                   </p>
                   <p className="text-[10px] text-gray-600 truncate">{status.employee.email}</p>
                 </div>
@@ -179,7 +213,7 @@ const AdminSetup: React.FC = () => {
               className="w-full h-10 bg-brand-white text-brand-black border-2 border-brand-black rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:-translate-y-1 transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M720-400v-120H600v-80h120v-120h80v120h120v80H800v120h-80Zm-440-40q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM0-160v-64q0-37 19-68.5t53-48.5q58-28 121.5-43.5T320-400q9 0 17.5.5t17.5 1.5q-15 15-25 32.5T312-328q-11-1-21-1.5t-21-.5q-54 0-104 13t-95 40q-14 8-21.5 21T43-224v21h257q5 19 14 36t21 32l-335-5Z"/></svg>
-              {status?.employee?.connected ? 'Reconectar' : 'Conectar Funcionário'}
+              {status?.employee?.connected || status?.employee?.needsReconnect ? 'Reconectar' : 'Conectar Funcionário'}
             </button>
           </div>
         </div>

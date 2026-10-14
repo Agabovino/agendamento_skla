@@ -1,18 +1,6 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-scheduling_db}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   backend:
     build:
       context: ./backend
@@ -21,12 +9,12 @@ services:
     ports:
       - "5555:5555"
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-scheduling_db}
+      - DATABASE_URL=file:/data/agendamento.db
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=https://agendamento.skla.video/api/auth/google/callback
-    depends_on:
-      - db
+    volumes:
+      - sqlite_data:/data
 
   app:
     build:
@@ -50,4 +38,4 @@ services:
 
 
 volumes:
-  postgres_data:
+  sqlite_data:

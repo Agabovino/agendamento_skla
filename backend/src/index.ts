@@ -1,13 +1,13 @@
 import express, { type Request, type Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import CryptoJS from 'crypto-js';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,8 +15,10 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '../.env'), override: true });
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
+// SQLite local: DATABASE_URL="file:/caminho/absoluto/agendamento.db" (caminho relativo = pasta do backend)
+const dbPath = path.resolve(__dirname, '..', (process.env.DATABASE_URL || 'file:./agendamento.db').replace(/^file:/, ''));
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
 const prisma = new PrismaClient({ adapter });
 
 const app = express();
@@ -43,26 +45,121 @@ const decrypt = (ciphertext: string) => {
 };
 
 // --- HELPER: Refresh Google Token ---
-async function getAuthenticatedClient(admin: any) {
-  oauth2Client.setCredentials({
-    access_token: decrypt(admin.accessToken),
-    refresh_token: decrypt(admin.refreshToken),
-    expiry_date: admin.tokenExpiry?.getTime()
+const CALENDAR_UNAVAILABLE_MSG = 'A agenda está temporariamente indisponível para novos agendamentos. Por favor, tente novamente mais tarde ou entre em contato conosco.';
+
+// O Google responde invalid_grant quando o refresh token foi revogado ou expirou:
+// a única saída é a pessoa reconectar a conta no painel /admin/setup.
+const isInvalidGrant = (e: any) =>
+  e?.response?.data?.error === 'invalid_grant' || String(e?.message || '').includes('invalid_grant');
+
+// Marca a conta como desconectada para o painel mostrar "Reconectar"
+async function markDisconnected(user: any) {
+  const current = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!current?.refreshToken) return; // já marcada
+  console.error(`Google token inválido para ${user.email} — conta marcada como desconectada.`);
+  await prisma.user.update({ where: { id: user.id }, data: { accessToken: null, refreshToken: null, tokenExpiry: null } });
+  await prisma.systemSettings.updateMany({
+    data: user.isAdmin ? { isCalendarConnected: false } : { isEmployeeConnected: false }
+  });
+  await sendDisconnectAlert(user);
+}
+
+// --- ALERTA POR E-MAIL (Resend) ---
+// RESEND_API_KEY: chave de envio | ALERT_EMAIL_TO: destinatários separados por vírgula
+// ALERT_EMAIL_FROM: remetente (sem domínio verificado no Resend, só funciona onboarding@resend.dev → e-mail dono da conta)
+async function sendDisconnectAlert(user: any) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = (process.env.ALERT_EMAIL_TO || '').split(',').map(e => e.trim()).filter(Boolean);
+  if (!apiKey || to.length === 0) return;
+
+  const setupUrl = new URL('/admin/setup', process.env.GOOGLE_REDIRECT_URI || 'https://agendamento.skla.video').toString();
+  const which = user.isAdmin ? 'agenda principal' : 'agenda do funcionário';
+  const impact = user.isAdmin
+    ? 'Enquanto ela não for reconectada, os clientes <b>não conseguem fazer novos agendamentos</b>.'
+    : 'Os agendamentos continuam funcionando, mas <b>não estão sendo copiados</b> para a agenda do funcionário.';
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: process.env.ALERT_EMAIL_FROM || 'Agendamento SKLA <onboarding@resend.dev>',
+        to,
+        subject: `⚠️ Reconecte a ${which} (${user.email}) — Agendamento SKLA`,
+        html: `
+          <p>O Google encerrou o acesso do sistema de agendamento à <b>${which}</b> (<b>${user.email}</b>).</p>
+          <p>${impact}</p>
+          <p><b>Como resolver:</b></p>
+          <ol>
+            <li>Acesse <a href="${setupUrl}">${setupUrl}</a> e entre com a senha do painel.</li>
+            <li>Clique em <b>Reconectar</b> no cartão da ${which}.</li>
+            <li>Entre com a conta <b>${user.email}</b>. Se aparecer "O Google não verificou este app", clique em <b>Avançado → Acessar Agendamento Skla</b>.</li>
+          </ol>`
+      })
+    });
+    if (!res.ok) console.error('Falha ao enviar alerta por e-mail:', res.status, await res.text());
+    else console.log(`Alerta de desconexão enviado para ${to.join(', ')}`);
+  } catch (e) {
+    console.error('Falha ao enviar alerta por e-mail:', e);
+  }
+}
+
+// Verificação periódica: detecta conta desconectada mesmo sem ninguém usar o site
+const HEALTH_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
+setInterval(async () => {
+  try {
+    const users = await prisma.user.findMany({ where: { OR: [{ isAdmin: true }, { isEmployee: true }], refreshToken: { not: null } } });
+    for (const u of users) await checkConnection(u);
+  } catch (e) {
+    console.error('Erro na verificação periódica das agendas:', e);
+  }
+}, HEALTH_CHECK_INTERVAL_MS).unref();
+
+// Cliente OAuth próprio por usuário (o global é compartilhado e misturaria credenciais entre admin e funcionário)
+async function getAuthenticatedClient(user: any, forceRefresh = false) {
+  const client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
+  client.setCredentials({
+    access_token: user.accessToken ? decrypt(user.accessToken) : undefined,
+    refresh_token: decrypt(user.refreshToken),
+    expiry_date: user.tokenExpiry?.getTime()
   });
 
   // Verifica se expirou ou está perto (5 mins)
-  if (!admin.tokenExpiry || admin.tokenExpiry.getTime() < Date.now() + 5 * 60 * 1000) {
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    await prisma.user.update({
-      where: { id: admin.id },
-      data: {
-        accessToken: credentials.access_token ? encrypt(credentials.access_token) : undefined,
-        tokenExpiry: credentials.expiry_date ? new Date(credentials.expiry_date) : undefined,
-      }
-    });
-    oauth2Client.setCredentials(credentials);
+  if (forceRefresh || !user.tokenExpiry || user.tokenExpiry.getTime() < Date.now() + 5 * 60 * 1000) {
+    try {
+      const { credentials } = await client.refreshAccessToken();
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          accessToken: credentials.access_token ? encrypt(credentials.access_token) : undefined,
+          tokenExpiry: credentials.expiry_date ? new Date(credentials.expiry_date) : undefined,
+        }
+      });
+      client.setCredentials(credentials);
+    } catch (e) {
+      if (isInvalidGrant(e)) await markDisconnected(user);
+      throw e;
+    }
   }
-  return oauth2Client;
+  return client;
+}
+
+// Testa de verdade se o Google ainda aceita o token da conta
+async function checkConnection(user: any) {
+  if (!user) return null;
+  if (!user.refreshToken) return { connected: false, email: user.email, needsReconnect: true };
+  try {
+    await getAuthenticatedClient(user, true);
+    return { connected: true, email: user.email, needsReconnect: false };
+  } catch (e) {
+    // Erro que não é invalid_grant (ex.: rede instável): não assume desconexão
+    if (!isInvalidGrant(e)) return { connected: true, email: user.email, needsReconnect: false, checkFailed: true };
+    return { connected: false, email: user.email, needsReconnect: true };
+  }
 }
 
 // --- ADMIN AUTH ---
@@ -82,19 +179,21 @@ app.get('/api/admin/status', async (req, res) => {
 
   try {
     jwt.verify(token, JWT_SECRET);
-    const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
-    const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
-
-    res.json({ 
-      admin: admin ? { connected: !!admin.refreshToken, email: admin.email } : null,
-      employee: employee ? { connected: !!employee.refreshToken, email: employee.email } : null,
-      // Suporte legado (frontend pode estar usando isso para o estado inicial)
-      connected: !!admin?.refreshToken,
-      email: admin?.email
-    });
   } catch (e) {
-    res.status(401).json({ connected: false });
+    return res.status(401).json({ connected: false });
   }
+
+  const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
+  const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
+  const [adminStatus, employeeStatus] = await Promise.all([checkConnection(admin), checkConnection(employee)]);
+
+  res.json({
+    admin: adminStatus,
+    employee: employeeStatus,
+    // Suporte legado (frontend pode estar usando isso para o estado inicial)
+    connected: !!adminStatus?.connected,
+    email: admin?.email
+  });
 });
 // --- GOOGLE OAUTH FLOW (STILL USED BY ADMIN) ---
 app.get('/api/auth/google', (req, res) => {
@@ -259,7 +358,8 @@ app.get('/api/availability', async (req, res) => {
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
   const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
   
-  if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });
+  if (!admin) return res.status(503).json({ error: 'System not configured' });
+  if (!admin.refreshToken) return res.status(503).json({ error: CALENDAR_UNAVAILABLE_MSG, code: 'calendar_disconnected' });
 
   try {
     const settings = await prisma.systemSettings.findFirst();
@@ -302,6 +402,10 @@ app.get('/api/availability', async (req, res) => {
     });
   } catch (e) {
     console.error('Error fetching calendars:', e);
+    if (isInvalidGrant(e)) {
+      await markDisconnected(admin);
+      return res.status(503).json({ error: CALENDAR_UNAVAILABLE_MSG, code: 'calendar_disconnected' });
+    }
     res.status(500).json({ error: 'Failed to fetch availability' });
   }
 });
@@ -314,23 +418,11 @@ app.post('/api/appointments', async (req, res) => {
   const admin = await prisma.user.findFirst({ where: { isAdmin: true } });
   const employee = await prisma.user.findFirst({ where: { isEmployee: true } });
   
-  if (!admin || !admin.refreshToken) return res.status(503).json({ error: 'System not configured' });
+  if (!admin) return res.status(503).json({ error: 'System not configured' });
+  if (!admin.refreshToken) return res.status(503).json({ error: CALENDAR_UNAVAILABLE_MSG, code: 'calendar_disconnected' });
 
   try {
-    // 1. Salvar no banco local
-    const appointment = await prisma.appointment.create({
-      data: {
-        hostId: admin.id,
-        clientEmail,
-        clientName,
-        location,
-        service,
-        startTime: start,
-        endTime: end
-      }
-    });
-
-    // 2. Inserir no Google Calendar do Admin
+    // 1. Inserir no Google Calendar do Admin (antes do banco: se o Google falhar, nada fica salvo pela metade)
     const auth = await getAuthenticatedClient(admin);
     const calendar = google.calendar({ version: 'v3', auth });
 
@@ -348,6 +440,19 @@ app.post('/api/appointments', async (req, res) => {
       sendUpdates: 'all',
     });
 
+    // 2. Salvar no banco local
+    const appointment = await prisma.appointment.create({
+      data: {
+        hostId: admin.id,
+        clientEmail,
+        clientName,
+        location,
+        service,
+        startTime: start,
+        endTime: end
+      }
+    });
+
     // 3. Inserir no Google Calendar do Funcionário
     if (employee && employee.refreshToken) {
       try {
@@ -363,13 +468,18 @@ app.post('/api/appointments', async (req, res) => {
         });
       } catch (empErr) {
         console.error('Error adding event to employee calendar:', empErr);
+        if (isInvalidGrant(empErr)) await markDisconnected(employee);
       }
     }
 
     res.status(201).json(appointment);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Error' });
+    if (isInvalidGrant(error)) {
+      await markDisconnected(admin);
+      return res.status(503).json({ error: CALENDAR_UNAVAILABLE_MSG, code: 'calendar_disconnected' });
+    }
+    res.status(500).json({ error: 'Não foi possível concluir o agendamento. Tente novamente em instantes.' });
   }
 });
 
